@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: saas-agent
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/negocios_saasagent}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
