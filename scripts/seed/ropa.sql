@@ -13,3 +13,4 @@ insert into producto (empresa_id, nombre, descripcion, precio, stock, activo) va
 (@empresa_id, 'Short azul', 'Short deportivo con bolsillos. Tallas S a L.', 49.90, 20, true),
 (@empresa_id, 'Short negro', 'Short deportivo con bolsillos. Tallas S a L.', 49.90, 12, false),
 (@empresa_id, 'Polera negra con capucha', 'Polera con capucha y bolsillo. Tallas S a XL.', 99.90, 10, true);
+
