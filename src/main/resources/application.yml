@@ -9,3 +9,9 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+
+app:
+  gemini:
+    model: ${GEMINI_MODEL:gemini-3.6-flash}
+    # Proyecto de Google Cloud que paga el uso (se autentica con gcloud auth application-default login)
+    project: ${GCP_PROJECT_ID:}
