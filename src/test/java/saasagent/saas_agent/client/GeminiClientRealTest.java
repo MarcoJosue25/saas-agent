@@ -7,10 +7,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/*
- * Prueba manual contra Gemini de verdad: gasta crédito, así que solo corre si defino
- * GEMINI_PRUEBA_REAL=true. Necesita GCP_PROJECT_ID y, si quiero otro modelo, GEMINI_MODEL.
- */
+// Prueba manual contra Gemini: gasta crédito, solo corre si defino GEMINI_PRUEBA_REAL=true.
 @EnabledIfEnvironmentVariable(named = "GEMINI_PRUEBA_REAL", matches = "true")
 class GeminiClientRealTest {
 
@@ -19,7 +16,7 @@ class GeminiClientRealTest {
         GeminiClient cliente = new GeminiClient(
                 new AppConfig().restClientBuilder(),
                 JsonMapper.builder().build(),
-                valor("GEMINI_MODEL", "gemini-3.6-flash"),
+                valor("GEMINI_MODEL", "gemini-3.5-flash-lite"),
                 valor("GCP_PROJECT_ID", ""));
 
         String respuesta = cliente.generarRespuesta(
