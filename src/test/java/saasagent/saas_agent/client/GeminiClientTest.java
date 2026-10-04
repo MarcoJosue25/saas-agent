@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import saasagent.saas_agent.dto.RespuestaGemini;
 import saasagent.saas_agent.exception.GeminiException;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -88,5 +89,24 @@ class GeminiClientTest {
         assertThatThrownBy(() -> cliente.generarRespuesta("instrucciones", "hola"))
                 .isInstanceOf(GeminiException.class)
                 .hasMessageContaining("no devolvió texto");
+    }
+
+    // Si Gemini llama a una función, la respuesta trae su nombre y sus argumentos en vez de texto
+    @Test
+    void siGeminiLlamaAUnaFuncionSeDevuelveSuNombreYSusArgumentos() {
+        String json = """
+                {"candidates": [{"content": {"parts": [{"functionCall": {"name": "crear_pedido",
+                    "args": {"items": [{"producto": "Polo básico negro", "cantidad": 2}]}}}]}}]}
+                """;
+        servidor.expect(requestTo(URL))
+                .andExpect(jsonPath("$.tools[0].functionDeclarations[0].name").value("crear_pedido"))
+                .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+        RespuestaGemini respuesta = cliente.consultar("instrucciones", "quiero 2 polos negros",
+                "[{\"functionDeclarations\": [{\"name\": \"crear_pedido\"}]}]");
+
+        assertThat(respuesta.esLlamadaAFuncion()).isTrue();
+        assertThat(respuesta.funcion()).isEqualTo("crear_pedido");
+        assertThat(respuesta.argumentos().path("items").path(0).path("cantidad").asInt()).isEqualTo(2);
     }
 }

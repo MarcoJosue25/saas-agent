@@ -1,0 +1,29 @@
+[
+  {
+    "functionDeclarations": [
+      {
+        "name": "crear_pedido",
+        "description": "Registra el pedido del cliente. Úsala solo cuando el cliente ya confirmó qué productos y cuántas unidades quiere.",
+        "parameters": {
+          "type": "OBJECT",
+          "properties": {
+            "items": {
+              "type": "ARRAY",
+              "description": "Productos del pedido",
+              "items": {
+                "type": "OBJECT",
+                "properties": {
+                  "producto": { "type": "STRING", "description": "Nombre exacto del producto, como aparece en el catálogo" },
+                  "cantidad": { "type": "INTEGER", "description": "Unidades que quiere el cliente" },
+                  "talla": { "type": "STRING", "description": "Talla que pidió el cliente, si la dijo" }
+                },
+                "required": ["producto", "cantidad"]
+              }
+            }
+          },
+          "required": ["items"]
+        }
+      }
+    ]
+  }
+]

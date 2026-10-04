@@ -7,7 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import saasagent.saas_agent.dto.RespuestaGemini;
 import saasagent.saas_agent.exception.GeminiException;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -33,30 +35,46 @@ public class GeminiClient {
         this.modelo = modelo;
         this.proyecto = proyecto;
     }
-    //Manda el archivo esperado a la IA espera la respuesta generada y la devuelve como String
+    //Manda las instrucciones y el mensaje a la IA, espera la respuesta generada y la devuelve como String
     public String generarRespuesta(String instrucciones, String mensajeCliente) {
+        return extraerTexto(enviar(construirCuerpo(instrucciones, mensajeCliente, null)));
+    }
+
+    // Igual que la anterior, pero Gemini puede responder con una llamada a una función en vez de texto
+    public RespuestaGemini consultar(String instrucciones, String mensajeCliente, String herramientasJson) {
+        String respuesta = enviar(construirCuerpo(instrucciones, mensajeCliente, herramientasJson));
+
+        for (JsonNode parte : mapper.readTree(respuesta).path("candidates").path(0).path("content").path("parts")) {
+            if (parte.has("functionCall")) {
+                JsonNode llamada = parte.path("functionCall");
+                return new RespuestaGemini(null, llamada.path("name").asString(""), llamada.path("args"));
+            }
+        }
+        return new RespuestaGemini(extraerTexto(respuesta), null, null);
+    }
+
+    private String enviar(String cuerpo) {
         String url = "https://aiplatform.googleapis.com/v1/projects/" + proyecto
                 + "/locations/global/publishers/google/models/" + modelo + ":generateContent";
 
         log.info("Llamando a Gemini (proyecto {}, modelo {})", proyecto, modelo);
 
         try {
-            String respuesta = restClient.post()
+            return restClient.post()
                     .uri(url)
                     .header("Authorization", "Bearer " + obtenerToken())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(construirCuerpo(instrucciones, mensajeCliente))
+                    .body(cuerpo)
                     .retrieve()
                     .body(String.class);
-
-            return extraerTexto(respuesta);
         } catch (RestClientException e) {
             log.error("Falló la llamada a Gemini: {}", e.getMessage());
             throw new GeminiException("No se pudo obtener la respuesta de Gemini", e);
         }
     }
-    //Arma el json con el mensaje del cliente y los datos de la empresa.
-    private String construirCuerpo(String instrucciones, String mensajeCliente) {
+
+    //Arma el json con el mensaje del cliente y los datos de la empresa. Las herramientas son opcionales
+    private String construirCuerpo(String instrucciones, String mensajeCliente, String herramientasJson) {
         ObjectNode cuerpo = mapper.createObjectNode();
 
         cuerpo.putObject("systemInstruction")
@@ -68,6 +86,9 @@ public class GeminiClient {
         turno.put("role", "user");
         turno.putArray("parts").addObject().put("text", mensajeCliente);
 
+        if (herramientasJson != null) {
+            cuerpo.set("tools", mapper.readTree(herramientasJson));
+        }
         return mapper.writeValueAsString(cuerpo);
     }
 
