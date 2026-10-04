@@ -1,5 +1,5 @@
 insert into empresa (nombre, id_numero_meta)
-values ('Moda Norte', '100000000000001');
+values ('Basics Moda', '100000000000001');
 
 -- Da el último id generado por Mysql
 set @empresa_id = last_insert_id();
