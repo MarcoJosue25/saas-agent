@@ -15,10 +15,13 @@ import saasagent.saas_agent.service.AgenteService;
 import saasagent.saas_agent.util.FiltroIntencionRapida;
 import saasagent.saas_agent.util.RespuestaSaludoProvider;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,7 +71,8 @@ class ConversacionServiceImplTest {
 
     @Test
     void unMensajeNormalLlamaAlAgenteYLaConversacionNuevaLlevaLaEmpresa() {
-        when(agenteService.responder(empresa, "¿cuánto cuesta el polo negro?")).thenReturn("Cuesta S/ 35.00");
+        when(agenteService.responder(eq(empresa), eq("¿cuánto cuesta el polo negro?"), anyList()))
+                .thenReturn("Cuesta S/ 35.00");
 
         String respuesta = servicio.procesarMensaje(solicitud("¿cuánto cuesta el polo negro?"));
 
@@ -78,6 +82,20 @@ class ConversacionServiceImplTest {
         verify(conversacionRepository).save(conversacion.capture());
         assertThat(conversacion.getValue().getEmpresa()).isSameAs(empresa);
         assertThat(conversacion.getValue().getTelefonoCliente()).isEqualTo(TELEFONO);
+    }
+
+    //Comprueba que el agente reciba la conversación anterior en orden, del mensaje más antiguo al más reciente
+    @Test
+    void elAgenteRecibeElHistorialEnOrdenCronologico() {
+        Mensaje primero = Mensaje.builder().rol(Rol.CLIENTE).contenido("cuanto cuesta el polo negro").build();
+        Mensaje segundo = Mensaje.builder().rol(Rol.AGENTE).contenido("Cuesta S/ 35.00").build();
+        // El repositorio los entrega del más nuevo al más antiguo
+        when(mensajeRepository.findTop10ByConversacion_IdOrderByIdDesc(any())).thenReturn(List.of(segundo, primero));
+        when(agenteService.responder(eq(empresa), eq("y en que tallas esta?"), anyList())).thenReturn("De la S a la XL");
+
+        servicio.procesarMensaje(solicitud("y en que tallas esta?"));
+
+        verify(agenteService).responder(eq(empresa), eq("y en que tallas esta?"), eq(List.of(primero, segundo)));
     }
 
     private static MensajeRequest solicitud(String texto) {

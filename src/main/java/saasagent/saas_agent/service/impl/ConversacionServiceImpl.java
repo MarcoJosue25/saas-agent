@@ -15,6 +15,10 @@ import saasagent.saas_agent.service.ConversacionService;
 import saasagent.saas_agent.util.FiltroIntencionRapida;
 import saasagent.saas_agent.util.RespuestaSaludoProvider;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ConversacionServiceImpl implements ConversacionService {
@@ -33,10 +37,11 @@ public class ConversacionServiceImpl implements ConversacionService {
                 .orElseThrow(() -> new IllegalArgumentException("No existe una empresa activa con ese número"));
 
         Conversacion conversacion = obtenerConversacion(empresa, request.getTelefonoCliente());
+        List<Mensaje> historial = obtenerHistorial(conversacion);
         guardarMensaje(conversacion, Rol.CLIENTE, request.getTexto());
 
         String respuesta = filtroIntencionRapida.esSaludo(request.getTexto())
-                ? respuestaSaludoProvider.obtenerRespuesta() : agenteService.responder(empresa, request.getTexto());
+                ? respuestaSaludoProvider.obtenerRespuesta() : agenteService.responder(empresa, request.getTexto(), historial);
         guardarMensaje(conversacion, Rol.AGENTE, respuesta);
         return respuesta;
     }
@@ -56,5 +61,12 @@ public class ConversacionServiceImpl implements ConversacionService {
     private void guardarMensaje(Conversacion conversacion, Rol rol, String contenido){
         mensajeRepository.save(Mensaje.builder()
                 .conversacion(conversacion).rol(rol).contenido(contenido).build());
+    }
+
+    private List<Mensaje> obtenerHistorial(Conversacion conversacion) {
+        List<Mensaje> historial = new ArrayList<>(
+                mensajeRepository.findTop10ByConversacion_IdOrderByIdDesc(conversacion.getId()));
+        Collections.reverse(historial); // llegan del más nuevo al más antiguo
+        return historial;
     }
 }

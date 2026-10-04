@@ -6,12 +6,16 @@ import org.springframework.stereotype.Service;
 import saasagent.saas_agent.client.GeminiClient;
 import saasagent.saas_agent.exception.GeminiException;
 import saasagent.saas_agent.model.Empresa;
+import saasagent.saas_agent.model.Mensaje;
+import saasagent.saas_agent.model.enums.Rol;
 import saasagent.saas_agent.service.AgenteService;
 import saasagent.saas_agent.service.ProductoService;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -31,10 +35,10 @@ public class AgenteServiceImpl implements AgenteService {
     }
 
     @Override
-    public String responder(Empresa empresa, String mensajeCliente) {
+    public String responder(Empresa empresa, String mensajeCliente, List<Mensaje> historial) {
         String catalogo = productoService.catalogoPrompt(empresa.getId());
         String instrucciones = plantillaPrompt.replace("{empresa}", empresa.getNombre())
-                .replace("{catalogo}", catalogo);
+                .replace("{catalogo}", catalogo).replace("{historial}", formatearHistorial(historial));
 
         try {
             return geminiClient.generarRespuesta(instrucciones, mensajeCliente);
@@ -44,6 +48,15 @@ public class AgenteServiceImpl implements AgenteService {
         }
     }
 
+    //Devuelve la lista de mensajes anteriores en un solo String
+    private String formatearHistorial(List<Mensaje> historial) {
+        if (historial.isEmpty()) {
+            return "(Todavía no hay mensajes anteriores.)";
+        }
+        return historial.stream()
+                .map(m -> (m.getRol() == Rol.CLIENTE ? "Cliente: " : "Asistente: ") + m.getContenido())
+                .collect(Collectors.joining("\n"));
+    }
 
     //Convierte a String y guarda el archivo con instrucciones de IA en la variable plantillaPrompt
     // Si hay algun error el fallo es al arrancar y no cuando se envía algún mensaje

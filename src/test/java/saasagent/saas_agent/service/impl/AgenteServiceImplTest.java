@@ -6,7 +6,11 @@ import org.mockito.ArgumentCaptor;
 import saasagent.saas_agent.client.GeminiClient;
 import saasagent.saas_agent.exception.GeminiException;
 import saasagent.saas_agent.model.Empresa;
+import saasagent.saas_agent.model.Mensaje;
+import saasagent.saas_agent.model.enums.Rol;
 import saasagent.saas_agent.service.ProductoService;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,7 +42,7 @@ class AgenteServiceImplTest {
         when(geminiClient.generarRespuesta(anyString(), eq("¿cuánto cuesta el polo negro?")))
                 .thenReturn("Cuesta S/ 35.00");
 
-        String respuesta = agente.responder(empresa, "¿cuánto cuesta el polo negro?");
+        String respuesta = agente.responder(empresa, "¿cuánto cuesta el polo negro?", List.of());
 
         assertThat(respuesta).isEqualTo("Cuesta S/ 35.00");
 
@@ -48,7 +52,25 @@ class AgenteServiceImplTest {
                 .contains("Moda Norte")
                 .contains(catalogo)
                 .doesNotContain("{empresa}")
-                .doesNotContain("{catalogo}");
+                .doesNotContain("{catalogo}")
+                .doesNotContain("{historial}");
+    }
+
+    //Comprueba que la conversación anterior llegue a Gemini, del mensaje más antiguo al más reciente
+    @Test
+    void lasInstruccionesLlevanElHistorialDeLaConversacion() {
+        when(productoService.catalogoPrompt(1L)).thenReturn("catálogo de prueba");
+        when(geminiClient.generarRespuesta(anyString(), anyString())).thenReturn("De la S a la XL");
+        List<Mensaje> historial = List.of(
+                Mensaje.builder().rol(Rol.CLIENTE).contenido("cuanto cuesta el polo negro").build(),
+                Mensaje.builder().rol(Rol.AGENTE).contenido("Cuesta S/ 35.00").build());
+
+        agente.responder(empresa, "y en que tallas esta?", historial);
+
+        ArgumentCaptor<String> instrucciones = ArgumentCaptor.forClass(String.class);
+        verify(geminiClient).generarRespuesta(instrucciones.capture(), eq("y en que tallas esta?"));
+        assertThat(instrucciones.getValue())
+                .contains("Cliente: cuanto cuesta el polo negro\nAsistente: Cuesta S/ 35.00");
     }
 
     //Creamos una falsa respuesta para esta prueba, y se espera el mensaje de respaldo
@@ -57,7 +79,7 @@ class AgenteServiceImplTest {
         when(productoService.catalogoPrompt(1L)).thenReturn("catálogo de prueba");
         when(geminiClient.generarRespuesta(anyString(), anyString())).thenThrow(new GeminiException("falló"));
 
-        String respuesta = agente.responder(empresa, "hola");
+        String respuesta = agente.responder(empresa, "hola", List.of());
 
         assertThat(respuesta).isNotBlank();
     }

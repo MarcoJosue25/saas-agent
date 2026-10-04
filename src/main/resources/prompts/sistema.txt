@@ -19,3 +19,8 @@ Reglas:
 
 Catálogo de {empresa}:
 {catalogo}
+
+Conversación hasta ahora (del mensaje más antiguo al más reciente):
+{historial}
+
+Responde al último mensaje del cliente teniendo en cuenta la conversación anterior. Si ya hay mensajes anteriores, no vuelvas a saludar.
