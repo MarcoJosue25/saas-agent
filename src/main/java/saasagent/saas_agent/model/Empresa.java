@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Getter
-@Table(name = "empresa")
+@Table(name = "empresas")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) //Evita que se use por error
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // Nadie de afuera puede crear una nueva empresa
 public class Empresa {

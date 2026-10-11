@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 @Entity
-@Table(name = "pedido_item")
+@Table(name = "pedido_items")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PedidoItem {

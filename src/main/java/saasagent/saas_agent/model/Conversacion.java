@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "conversacion")
+@Table(name = "conversaciones")
 public class Conversacion {
 
     @Id
@@ -36,7 +36,7 @@ public class Conversacion {
         this.fechaUltimoMensaje = LocalDateTime.now();
     }
 
-    //Para que el service no requiera Setters
+    //Para que el service lo llame sin requerir setters
     public void registrarMensaje() {
         this.fechaUltimoMensaje = LocalDateTime.now();
     }

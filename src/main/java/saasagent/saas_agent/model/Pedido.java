@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Entity
-@Table(name = "pedido")
+@Table(name = "pedidos")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Pedido {
