@@ -1,5 +1,6 @@
 package saasagent.saas_agent.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class MensajeController {
     private final ConversacionService conversacionService;
 
     @PostMapping
-    public MensajeResponse recibirMensaje(@RequestBody MensajeRequest request){
+    public MensajeResponse recibirMensaje(@Valid @RequestBody MensajeRequest request){
         log.info("Endpoint hit: POST /api/v1/mensajes");
         String respuesta = conversacionService.procesarMensaje(request);
         return new MensajeResponse(respuesta);

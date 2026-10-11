@@ -3,6 +3,7 @@ package saasagent.saas_agent.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import saasagent.saas_agent.dto.MensajeRequest;
+import saasagent.saas_agent.exception.EmpresaNoEncontradaException;
 import saasagent.saas_agent.model.Conversacion;
 import saasagent.saas_agent.model.Empresa;
 import saasagent.saas_agent.model.Mensaje;
@@ -33,7 +34,7 @@ public class ConversacionServiceImpl implements ConversacionService {
     @Override
     public String procesarMensaje(MensajeRequest request){
         Empresa empresa = empresaRepository.findByIdNumeroMetaAndActivoTrue(request.getIdNumeroMeta())
-                .orElseThrow(() -> new IllegalArgumentException("No existe una empresa activa con ese número"));
+                .orElseThrow(() -> new EmpresaNoEncontradaException("No existe una empresa activa con ese número"));
 
         Conversacion conversacion = obtenerConversacion(empresa, request.getTelefonoCliente());
         List<Mensaje> historial = obtenerHistorial(conversacion);

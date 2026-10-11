@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import saasagent.saas_agent.dto.ResultadoValidacion;
+import saasagent.saas_agent.exception.StockInsuficienteException;
 import saasagent.saas_agent.model.Conversacion;
 import saasagent.saas_agent.model.Empresa;
 import saasagent.saas_agent.model.Pedido;
@@ -29,7 +30,7 @@ public class PedidoServiceImpl implements PedidoService {
             // Descuenta solo si todavía hay stock; si otro pedido se adelantó, devuelve 0
             int actualizado = productoRepository.descontarStock(item.producto().getId(), item.cantidad());
             if (actualizado == 0){
-                throw new IllegalStateException("No hay suficiente stock en: " + item.producto().getNombre());
+                throw new StockInsuficienteException("No hay suficiente stock en: " + item.producto().getNombre());
             }
             PedidoItem pedidoItem = pedidoItemRepository.save(PedidoItem.builder().pedido(pedido).producto(item.producto()).cantidad(item.cantidad())
                     .talla(item.talla()).precioUnitario(item.producto().getPrecio()).build());

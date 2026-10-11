@@ -8,6 +8,7 @@ import saasagent.saas_agent.dto.ItemPedidoRequest;
 import saasagent.saas_agent.dto.RespuestaGemini;
 import saasagent.saas_agent.dto.ResultadoValidacion;
 import saasagent.saas_agent.exception.GeminiException;
+import saasagent.saas_agent.exception.StockInsuficienteException;
 import saasagent.saas_agent.model.Conversacion;
 import saasagent.saas_agent.model.Empresa;
 import saasagent.saas_agent.model.Mensaje;
@@ -88,7 +89,7 @@ public class AgenteServiceImpl implements AgenteService {
             return "Listo, tu pedido #" + pedido.getId() + " quedó registrado:\n"
                     + resultado.items().stream().map(this::describirItem).collect(Collectors.joining("\n"))
                     + "\nTotal: S/ " + resultado.total().setScale(2, RoundingMode.HALF_UP).toPlainString();
-        } catch (IllegalStateException e) {
+        } catch (StockInsuficienteException e) {
             log.warn("No se pudo registrar el pedido: {}", e.getMessage());
             return "No pude registrar tu pedido porque el stock cambió. ¿Lo intentamos de nuevo?";
         }
