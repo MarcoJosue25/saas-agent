@@ -20,7 +20,7 @@ public class ValidadorServiceImpl implements ValidadorService {
     private final ProductoRepository productoRepository;
 
     @Override
-    public ResultadoValidacion validar(Long empresaId, List<ItemPedidoRequest> pedidos){
+    public ResultadoValidacion validar(Long empresaId, List<ItemPedidoRequest> pedidos) {
         List<String> errores = new ArrayList<>();
         List<ResultadoValidacion.Item> items = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
@@ -45,8 +45,8 @@ public class ValidadorServiceImpl implements ValidadorService {
                 items.add(new ResultadoValidacion.Item(producto, pedido.cantidad(), pedido.talla()));
                 total = total.add(producto.getPrecio().multiply(BigDecimal.valueOf(pedido.cantidad())));
             }
+
         }
         return new ResultadoValidacion(errores, items, total);
     }
 }
-

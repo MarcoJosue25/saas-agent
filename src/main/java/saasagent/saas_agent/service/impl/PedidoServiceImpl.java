@@ -24,17 +24,14 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public Pedido registrar(Empresa empresa, Conversacion conversacion, ResultadoValidacion resultado) {
-        Pedido pedido = pedidoRepository.save(Pedido.builder()
-                .empresa(empresa).conversacion(conversacion).total(resultado.total()).build());
-
-        for (ResultadoValidacion.Item item : resultado.items()) {
+        Pedido pedido = pedidoRepository.save(Pedido.builder().empresa(empresa).conversacion(conversacion).total(resultado.total()).build());
+        for (ResultadoValidacion.Item item : resultado.items()){
             // Descuenta solo si todavía hay stock; si otro pedido se adelantó, devuelve 0
-            int actualizados = productoRepository.descontarStock(item.producto().getId(), item.cantidad());
-            if (actualizados == 0) {
-                throw new IllegalStateException("No hay stock suficiente de " + item.producto().getNombre());
+            int actualizado = productoRepository.descontarStock(item.producto().getId(), item.cantidad());
+            if (actualizado == 0){
+                throw new IllegalStateException("No hay suficiente stock en: " + item.producto().getNombre());
             }
-            pedidoItemRepository.save(PedidoItem.builder()
-                    .pedido(pedido).producto(item.producto()).cantidad(item.cantidad())
+            PedidoItem pedidoItem = pedidoItemRepository.save(PedidoItem.builder().pedido(pedido).producto(item.producto()).cantidad(item.cantidad())
                     .talla(item.talla()).precioUnitario(item.producto().getPrecio()).build());
         }
         return pedido;

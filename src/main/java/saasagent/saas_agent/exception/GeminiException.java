@@ -6,7 +6,7 @@ public class GeminiException extends RuntimeException {
         super(message);
     }
 
-    // Recibe la causa del error con el tipo de respuesta http 429, 400. etc
+    // Recibe la causa del error con el tipo de respuesta http
     public GeminiException(String message, Throwable causa) {
         super(message, causa);
     }

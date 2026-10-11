@@ -71,7 +71,7 @@ class ConversacionServiceImplTest {
 
     @Test
     void unMensajeNormalLlamaAlAgenteYLaConversacionNuevaLlevaLaEmpresa() {
-        when(agenteService.responder(eq(empresa), eq("¿cuánto cuesta el polo negro?"), anyList()))
+        when(agenteService.responder(eq(empresa), any(), eq("¿cuánto cuesta el polo negro?"), anyList()))
                 .thenReturn("Cuesta S/ 35.00");
 
         String respuesta = servicio.procesarMensaje(solicitud("¿cuánto cuesta el polo negro?"));
@@ -91,11 +91,11 @@ class ConversacionServiceImplTest {
         Mensaje segundo = Mensaje.builder().rol(Rol.AGENTE).contenido("Cuesta S/ 35.00").build();
         // El repositorio los entrega del más nuevo al más antiguo
         when(mensajeRepository.findTop10ByConversacion_IdOrderByIdDesc(any())).thenReturn(List.of(segundo, primero));
-        when(agenteService.responder(eq(empresa), eq("y en que tallas esta?"), anyList())).thenReturn("De la S a la XL");
+        when(agenteService.responder(eq(empresa), any(), eq("y en que tallas esta?"), anyList())).thenReturn("De la S a la XL");
 
         servicio.procesarMensaje(solicitud("y en que tallas esta?"));
 
-        verify(agenteService).responder(eq(empresa), eq("y en que tallas esta?"), eq(List.of(primero, segundo)));
+        verify(agenteService).responder(eq(empresa), any(), eq("y en que tallas esta?"), eq(List.of(primero, segundo)));
     }
 
     private static MensajeRequest solicitud(String texto) {

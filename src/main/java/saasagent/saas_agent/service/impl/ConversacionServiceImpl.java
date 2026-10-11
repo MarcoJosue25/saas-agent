@@ -30,7 +30,6 @@ public class ConversacionServiceImpl implements ConversacionService {
     private final RespuestaSaludoProvider respuestaSaludoProvider;
     private final AgenteService agenteService;
 
-
     @Override
     public String procesarMensaje(MensajeRequest request){
         Empresa empresa = empresaRepository.findByIdNumeroMetaAndActivoTrue(request.getIdNumeroMeta())
@@ -41,7 +40,7 @@ public class ConversacionServiceImpl implements ConversacionService {
         guardarMensaje(conversacion, Rol.CLIENTE, request.getTexto());
 
         String respuesta = filtroIntencionRapida.esSaludo(request.getTexto())
-                ? respuestaSaludoProvider.obtenerRespuesta() : agenteService.responder(empresa, request.getTexto(), historial);
+                ? respuestaSaludoProvider.obtenerRespuesta() : agenteService.responder(empresa, conversacion, request.getTexto(), historial);
         guardarMensaje(conversacion, Rol.AGENTE, respuesta);
         return respuesta;
     }
@@ -59,8 +58,7 @@ public class ConversacionServiceImpl implements ConversacionService {
     }
 
     private void guardarMensaje(Conversacion conversacion, Rol rol, String contenido){
-        mensajeRepository.save(Mensaje.builder()
-                .conversacion(conversacion).rol(rol).contenido(contenido).build());
+        mensajeRepository.save(Mensaje.builder().conversacion(conversacion).rol(rol).contenido(contenido).build());
     }
 
     private List<Mensaje> obtenerHistorial(Conversacion conversacion) {

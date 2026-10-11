@@ -23,6 +23,4 @@ public class MensajeController {
         String respuesta = conversacionService.procesarMensaje(request);
         return new MensajeResponse(respuesta);
     }
-
-
 }
