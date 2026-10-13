@@ -38,14 +38,13 @@ public class ConversacionServiceImpl implements ConversacionService {
 
         Conversacion conversacion = obtenerConversacion(empresa, request.getTelefonoCliente());
         List<Mensaje> historial = obtenerHistorial(conversacion);
-        guardarMensaje(conversacion, Rol.CLIENTE, request.getTexto());
+        guardarMensaje(conversacion, Rol.CLIENTE, request.getTexto(), request.getIdMensajeMeta());
 
         String respuesta = filtroIntencionRapida.esSaludo(request.getTexto())
                 ? respuestaSaludoProvider.obtenerRespuesta() : agenteService.responder(empresa, conversacion, request.getTexto(), historial);
-        guardarMensaje(conversacion, Rol.AGENTE, respuesta);
+        guardarMensaje(conversacion, Rol.AGENTE, respuesta,null);
         return respuesta;
     }
-
 
     //Buscamos una conversacion anterior con el cliente, si no existe se crea una nueva
     private Conversacion obtenerConversacion(Empresa empresa, String telefonoCliente){
@@ -58,8 +57,9 @@ public class ConversacionServiceImpl implements ConversacionService {
         return conversacionRepository.save(conversacion);
     }
 
-    private void guardarMensaje(Conversacion conversacion, Rol rol, String contenido){
-        mensajeRepository.save(Mensaje.builder().conversacion(conversacion).rol(rol).contenido(contenido).build());
+    private void guardarMensaje(Conversacion conversacion, Rol rol, String contenido,String idMensajeMeta){
+        mensajeRepository.save(Mensaje.builder().conversacion(conversacion).rol(rol)
+                .contenido(contenido).idMensajeMeta(idMensajeMeta).build());
     }
 
     private List<Mensaje> obtenerHistorial(Conversacion conversacion) {
@@ -68,4 +68,11 @@ public class ConversacionServiceImpl implements ConversacionService {
         Collections.reverse(historial); // llegan del más nuevo al más antiguo
         return historial;
     }
+
+    //
+    @Override
+    public boolean yaProcesado(String idMensajeMeta){
+        return  idMensajeMeta != null && mensajeRepository.existsByIdMensajeMeta(idMensajeMeta);
+    }
+
 }

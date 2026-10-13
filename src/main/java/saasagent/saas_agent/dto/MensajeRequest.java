@@ -19,4 +19,7 @@ public class MensajeRequest {
 
     @NotBlank(message = "El texto del mensaje no puede estar vacío")
     private String texto;
+
+    //Opcional, solo si conectas whatsapp api con el proyecto, no es necesario para las pruebas
+    private String idMensajeMeta;
 }
