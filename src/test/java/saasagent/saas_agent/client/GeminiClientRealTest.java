@@ -19,9 +19,9 @@ class GeminiClientRealTest {
                 valor("GEMINI_MODEL", "gemini-3.5-flash-lite"),
                 valor("GCP_PROJECT_ID", ""));
 
-        String respuesta = cliente.generarRespuesta(
+        String respuesta = cliente.consultar(
                 "Eres un asistente de una tienda de ropa. Responde en una frase corta.",
-                "Hola, ¿cómo estás?");
+                "Hola, ¿cómo estás?",null).texto();
 
         System.out.println("Respuesta de Gemini: " + respuesta);
         assertThat(respuesta).isNotBlank();

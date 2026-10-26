@@ -35,12 +35,8 @@ public class GeminiClient {
         this.modelo = modelo;
         this.proyecto = proyecto;
     }
-    //Manda las instrucciones y el mensaje a la IA, espera la respuesta generada y la devuelve como String
-    public String generarRespuesta(String instrucciones, String mensajeCliente) {
-        return extraerTexto(enviar(construirCuerpo(instrucciones, mensajeCliente, null)));
-    }
 
-    // Igual que la anterior, pero Gemini puede responder con una llamada a una función en vez de texto
+    // Gemini puede responder con una llamada a una función en vez de texto
     public RespuestaGemini consultar(String instrucciones, String mensajeCliente, String herramientasJson) {
         String respuesta = enviar(construirCuerpo(instrucciones, mensajeCliente, herramientasJson));
 

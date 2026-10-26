@@ -55,9 +55,9 @@ class GeminiClientTest {
                         "{\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"¡Hola! ¿En qué te ayudo?\"}]}}]}",
                         MediaType.APPLICATION_JSON));
 
-        String respuesta = cliente.generarRespuesta("Sé breve", "hola");
+        RespuestaGemini respuesta = cliente.consultar("Sé breve", "hola", null);
 
-        assertThat(respuesta).isEqualTo("¡Hola! ¿En qué te ayudo?");
+        assertThat(respuesta.texto()).isEqualTo("¡Hola! ¿En qué te ayudo?");
         servidor.verify();
     }
 
@@ -65,7 +65,7 @@ class GeminiClientTest {
     void siGeminiDevuelveUnErrorSeLanzaGeminiException() {
         servidor.expect(requestTo(URL)).andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
 
-        assertThatThrownBy(() -> cliente.generarRespuesta("instrucciones", "hola"))
+        assertThatThrownBy(() -> cliente.consultar("instrucciones", "hola", null))
                 .isInstanceOf(GeminiException.class)
                 .hasMessageContaining("No se pudo obtener la respuesta");
     }
@@ -77,7 +77,7 @@ class GeminiClientTest {
             throw new IOException("sin conexión");
         });
 
-        assertThatThrownBy(() -> cliente.generarRespuesta("instrucciones", "hola"))
+        assertThatThrownBy(() -> cliente.consultar("instrucciones", "hola", null))
                 .isInstanceOf(GeminiException.class);
     }
 
@@ -86,7 +86,7 @@ class GeminiClientTest {
         servidor.expect(requestTo(URL))
                 .andRespond(withSuccess("{\"candidates\": []}", MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> cliente.generarRespuesta("instrucciones", "hola"))
+        assertThatThrownBy(() -> cliente.consultar("instrucciones", "hola", null))
                 .isInstanceOf(GeminiException.class)
                 .hasMessageContaining("no devolvió texto");
     }
